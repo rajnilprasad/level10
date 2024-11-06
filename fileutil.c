@@ -25,69 +25,70 @@ char ** loadFileAA(char *filename, int *size)
 	    perror("Can't open file");
 	    exit(1);
 	}
+
+	char **arr = NULL; // Pointer to array of strings
+    char buffer[256];  // Buffer to read lines
+    int count = 0;     // Number of entries
+    int capacity = 10; // Initial capacity
 	
 	// TODO
 	// Allocate memory for an array of strings (arr).
+	arr = malloc(capacity * sizeof(char *));
+    if (!arr) {
+        perror("Memory allocation failed");
+        fclose(in);
+        exit(1);
+    }
 	// Read the file line by line.
+	while (fgets(buffer, sizeof(buffer), in) != NULL) {
     //   Trim newline.
+	buffer[strcspn(buffer, "\n")] = 0;
 	//   Expand array if necessary (realloc).
+	if (count >= capacity) {
+            capacity *= 2;
+            arr = realloc(arr, capacity * sizeof(char *));
+            if (!arr) {
+                perror("Memory reallocation failed");
+                fclose(in);
+                exit(1);
+            }
+        }
 	//   Allocate memory for the string (str).
 	//   Copy each line into the string (use strcpy).
 	//   Attach the string to the large array (assignment =).
     // Close the file.
-	
+	 arr[count] = malloc((strlen(buffer) + 1) * sizeof(char));
+        if (!arr[count]) {
+            perror("Memory allocation for string failed");
+            fclose(in);
+            exit(1);
+        }
+        strcpy(arr[count], buffer);
+        count++;
+    }
+
+	 fclose(in);
 	// The size should be the number of entries in the array.
-	*size = 0;
+	*size = count;
 	
 	// Return pointer to the array of strings.
-	return NULL;
+	return arr;
+
 }
 
-char (*loadFile2D(char *filename, int *size))[COLS]
-{
-	FILE *in = fopen(filename, "r");
-	if (!in)
-	{
-	    perror("Can't open file");
-	    exit(1);
-	}
-	
-	// TODO
-	// Allocate memory for an 2D array, using COLS as the width.
-	// Read the file line by line into a buffer.
-    //   Trim newline.
-	//   Expand array if necessary (realloc).
-	//   Copy each line from the buffer into the array (use strcpy).
-    // Close the file.
-	
-	// The size should be the number of entries in the array.
-	*size = 0;
-	
-	// Return pointer to the array.
-	return NULL;
-}
-
-// Search the array for the target string.
-// Return the found string or NULL if not found.
-char * substringSearchAA(char *target, char **lines, int size)
-{
-
-	return NULL;
-}
-
-char * substringSearch2D(char *target, char (*lines)[COLS], int size)
-{
-    
-    return NULL;
+char * substringSearchAA(char *target, char **lines, int size) {
+    for (int i = 0; i < size; i++) {
+        if (strstr(lines[i], target) != NULL) {
+            return lines[i]; // Return the first matching string
+        }
+    }
+    return NULL; // No match found
 }
 
 // Free the memory used by the array
-void freeAA(char ** arr, int size)
-{
-
-}
-
-void free2D(char (*arr)[COLS])
-{
-
+void freeAA(char **arr, int size) {
+    for (int i = 0; i < size; i++) {
+        free(arr[i]); // Free each string
+    }
+    free(arr); // Free the array of pointers
 }
